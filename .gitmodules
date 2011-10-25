@@ -1,0 +1,9 @@
+[submodule "vendor/symfony/Component/ClassLoader"]
+	path = vendor/symfony/Component/ClassLoader
+	url = git://github.com/symfony/ClassLoader.git
+[submodule "vendor/ylly/CommandProcessor"]
+	path = vendor/ylly/CommandProcessor
+	url = git://github.com/ylly/CommandProcessor
+[submodule "vendor/monolog"]
+	path = vendor/monolog
+	url = git://github.com/Seldaek/monolog.git
