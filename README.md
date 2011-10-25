@@ -20,6 +20,7 @@ The application will::
  - Scan for one-to-many relationships, extract the data, recursive.
 
 Then::
+
  - Each fixture will be assigned a UUID in addition to storing its original ID.
  - Relationships will be redefined using the UUID. (i think)
 
