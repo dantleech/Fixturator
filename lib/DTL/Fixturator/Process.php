@@ -14,15 +14,18 @@ class Process extends BaseProcess
     protected $informationSchema;
     protected $connection;
     protected $fixtureStore;
+    protected $ignoreCols = array();
+    protected $exporter;
 
     protected $fixtures = array();
 
-    public function __construct($logger, \PDO $connection, $tableName, $pks = array())
+    public function __construct(\PDO $connection, $logger = null, $exporter, $tableName, $pks = array())
     {
         $this->connection = $connection;
         $this->tableName = $tableName;
         $this->pks = $pks;
         $this->logger = $logger;
+        $this->exporter = $exporter;
 
         $this->informationSchema = new InformationSchema($connection, $tableName);
         $this->fixtureStore = new FixtureStore($this->getLogger());;
@@ -34,10 +37,14 @@ class Process extends BaseProcess
         $this->addCommand(new Command('doInit', 'Initialize tables'));
         $this->addCommand(new Command('doPullRecords', 'Pull the records'));
         $this->addCommand(new Command('doReport', 'Fixture report'));
+        $this->addCommand(new COmmand('doExport', 'Export'));
     }
 
     private function pullRecords($tableName, $sourceRecord)
     {
+        if ($tableName != 'site') {
+            return;
+        }
         // many to one records
         $manyToOneConstraints = $this->informationSchema->getManyToOneConstraints($tableName);
         foreach ($manyToOneConstraints as $manyToOneConstraint) {
@@ -74,6 +81,8 @@ class Process extends BaseProcess
         foreach ($oneToManyRelationships as $oneToManyRelationship) {
             $relTableName = $oneToManyRelationship['table_name'];
             $relColumnName = $oneToManyRelationship['column_name'];
+
+            $this->getLogger()->debug($relTableName.'/'.$relColumnName);
 
             $sql = sprintf("SELECT * FROM %s WHERE %s = :pk /** ONE-TO-MANY RECORDS */",
                 $relTableName, $relColumnName
@@ -137,5 +146,10 @@ class Process extends BaseProcess
     public function doReport(Command $command)
     {
         echo $this->fixtureStore->report();
+    }
+
+    public function doExport(Command $command)
+    {
+        $this->exporter->export($this->fixtureStore);
     }
 }

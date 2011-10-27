@@ -39,4 +39,9 @@ class Store
 
         return implode("\n", $report);
     }
+
+    public function getTableStack()
+    {
+        return $this->tableStack;
+    }
 }
