@@ -19,7 +19,7 @@ class Process extends BaseProcess
 
     protected $fixtures = array();
 
-    public function __construct(\PDO $connection, $logger = null, $exporter, $tableName, $pks = array())
+    public function __construct(\PDO $connection, $logger = null, $exporter)
     {
         $this->connection = $connection;
         $this->tableName = $tableName;
