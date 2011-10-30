@@ -7,7 +7,7 @@ namespace DTL\MVC\Controller;
  */
 class Request
 {
-    protected $params = array();
+    public $params = array();
     protected $server = array();
 
     public function __construct($getParams = array(), $postParams = array(), $serverParams = array())
@@ -31,5 +31,10 @@ class Request
         } else {
             return $this->server['PATH_INFO'];
         }
+    }
+
+    public function mergeParams($params = array())
+    {
+        array_merge($this->params, $params);
     }
 }
