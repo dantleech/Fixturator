@@ -2,6 +2,7 @@
 
 namespace DTL\Fixturator\Map;
 use DTL\Fixturator\Map\PrimaryKey;
+use DTL\Fixturator\Map\Database;
 
 /**
  * @author Daniel Leech <daniel@dantleech.com> 
@@ -10,16 +11,16 @@ class Table
 {
     protected $primaryKey;
     protected $foreignKeys = array();
-    protected $dbname;
+    protected $database;
     protected $name;
 
-    public function __construct($dbname, $name)
+    public function __construct(Database $database, $name)
     {
-        $this->dbname = $dbname;
+        $this->database = $database;
         $this->name = $name;
     }
 
-    public function setPrimaryKeys(PrimaryKey $pk)
+    public function setPrimaryKey(PrimaryKey $pk)
     {
         $this->primaryKey = $pk;
     }
@@ -29,9 +30,9 @@ class Table
         return $this->name;
     }
 
-    public function getDatabaseName()
+    public function getDatabase()
     {
-        return $this->dbname;
+        return $this->database;
     }
 
     public function addForeignKey(ForeignKey $foreignKey)

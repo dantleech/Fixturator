@@ -3,6 +3,7 @@
 namespace DTL\Fixturator\Map\Loader;
 
 use DTL\Fixturator\Map\Table;
+use DTL\Fixturator\Map\Database;
 use DTL\Fixturator\Map\PrimaryKey;
 use DTL\Fixturator\Map\ForeignKey;
 
@@ -13,7 +14,7 @@ class MySQL
 {
     protected $dbh;
     protected $logger;
-    protected $tableIndex;
+    protected $table;
 
     protected $constraintData;
     protected $constraintDataInitialized = false;
@@ -27,6 +28,8 @@ class MySQL
 
     public function mapDatabase($name)
     {
+        $database = new Database($name);
+
         $this->dbh->query('USE information_schema');
         $sql = "SELECT * FROM tables WHERE table_schema = :dbname AND table_type = 'BASE TABLE'";
         $stmt = $this->dbh->prepare($sql);
@@ -36,24 +39,12 @@ class MySQL
         foreach ($tableRows as $tableRow) {
             if ($tableName = $tableRow['TABLE_NAME']) {
                 $this->logger->info('Mapping table', array('tableName' => $tableName));
-                $table = $this->getTable($name, $tableName);
+                $table = $database->getTable($tableName);
                 $this->initTable($table);
             }
         }
-    }
 
-    protected function getTable($dbname, $tableName)
-    {
-        $id = sprintf('%s-%s', $dbname, $tableName);
-
-        if (!isset($this->tableNameIndex[$id])) {
-            $table = new Table($dbname, $tableName);
-            $this->tableNameIndex[$id] = $table;
-        } else {
-            return $this->tableNameIndex[$id];
-        }
-
-        return $this->getTable($dbname, $tableName);
+        return $database;
     }
 
     protected function initTable(Table $table)
@@ -63,7 +54,7 @@ class MySQL
 
         $stmt = $this->dbh->prepare($sql);
         $stmt->execute(array(
-            ':dbname' => $table->getDatabaseName(),
+            ':dbname' => $table->getDatabase()->getName(),
             ':tableName' => $table->getName(),
         ));
         $cons = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -85,6 +76,7 @@ class MySQL
             $pk->addField($pkField['column_name']);
             $this->logger->info(' -- mapped PK', array('col' => $pkField['column_name']));
         }
+        $table->setPrimaryKey($pk);
     }
 
     protected function mapForeignKeys(Table $table, $constraintData)
@@ -94,7 +86,7 @@ class MySQL
         }
 
         foreach ($constraintData['FOREIGN KEY'] as $foreignKey) {
-            $referencedTable = $this->getTable($foreignKey['referenced_table_schema'], $foreignKey['referenced_table_name']);
+            $referencedTable = $table->getDatabase()->getTable($foreignKey['referenced_table_name']);
             $table->addForeignKey(new ForeignKey(
                 $foreignKey['column_name'],
                 $referencedTable,

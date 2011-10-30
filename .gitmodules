@@ -6,4 +6,7 @@
 	url = git://github.com/ylly/CommandProcessor
 [submodule "vendor/monolog"]
 	path = vendor/monolog
-	url = git://github.com/Seldaek/monolog.git
+    url = git://github.com/Seldaek/monolog.git
+[submodule "vendor/twig"]
+	path = vendor/twig
+	url = git://github.com/fabpot/Twig.git
